@@ -1,0 +1,6 @@
+cách chạy:
+b1
+dotnet run --project "D:\SOA\SOA\src\LoginService\LoginService.csproj"
+
+b2
+dotnet run --project "D:\SOA\SOA\src\LoginService\LoginService.csproj"
