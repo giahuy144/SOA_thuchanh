@@ -1,6 +1,8 @@
 cách chạy:
 b1
-dotnet run --project "D:\SOA\SOA\src\LoginService\LoginService.csproj"
+dotnet run --project "D:\SOA\SOA.worktrees\make-it-happen\src\LoginService\LoginService.csproj"
+
 
 b2
-dotnet run --project "D:\SOA\SOA\src\LoginService\LoginService.csproj"
+dotnet run --project "D:\SOA\SOA.worktrees\make-it-happen\src\AuthenticationService\AuthenticationService.csproj"
+
