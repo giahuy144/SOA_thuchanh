@@ -135,12 +135,16 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
+// Mở http://localhost:5103/ sẽ chuyển thẳng sang Swagger UI
+app.MapGet("/", () => Results.Redirect("/swagger"));
+
 // Endpoint kiểm tra service đang chạy (không cần token)
 app.MapGet("/health", () => Results.Ok(new
 {
     service = "ProductService",
     status = "ok",
     database = "SQLite (products.db)",
+    swagger = "/swagger",
     timeUtc = DateTime.UtcNow
 }));
 
