@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Service - Quản lý sản phẩm (SOA Lab 3)</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #0f172a;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --success: #16a34a;
+            --error: #dc2626;
+            --warn: #d97706;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 1.5rem 1rem 3rem;
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        header { margin-bottom: 1.5rem; }
+
+        h1 {
+            font-size: 1.6rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            flex-wrap: wrap;
+        }
+
+        .subtitle { color: var(--muted); margin-top: .35rem; font-size: .92rem; }
+
+        .pill {
+            font-size: .72rem;
+            font-weight: 700;
+            padding: .2rem .55rem;
+            border-radius: 999px;
+            background: #e0e7ff;
+            color: #3730a3;
+            letter-spacing: .02em;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: .75rem;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, .07);
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .card h2 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        /* --- Thanh đăng nhập --- */
+        .auth-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: .75rem;
+            align-items: end;
+        }
+
+        @media (max-width: 720px) { .auth-row { grid-template-columns: 1fr; } }
+
+        .field label {
+            display: block;
+            font-size: .78rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: .25rem;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: .55rem .7rem;
+            border: 1px solid var(--border);
+            border-radius: .4rem;
+            font-size: .875rem;
+            font-family: inherit;
+            outline: none;
+            background: #fff;
+            transition: border-color .15s, box-shadow .15s;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .12);
+        }
+
+        textarea { resize: vertical; min-height: 70px; }
+
+        button {
+            padding: .55rem .95rem;
+            border: none;
+            border-radius: .4rem;
+            font-weight: 600;
+            font-size: .875rem;
+            cursor: pointer;
+            background: var(--primary);
+            color: #fff;
+            transition: background .15s, opacity .15s;
+            font-family: inherit;
+        }
+
+        button:hover { background: var(--primary-hover); }
+        button:disabled { opacity: .55; cursor: not-allowed; }
+
+        button.ghost {
+            background: #fff;
+            color: #334155;
+            border: 1px solid var(--border);
+        }
+        button.ghost:hover { background: #f8fafc; }
+
+        button.danger { background: #fee2e2; color: #b91c1c; }
+        button.danger:hover { background: #fecaca; }
+
+        button.sm { padding: .35rem .6rem; font-size: .78rem; }
+
+        /* --- Trạng thái --- */
+        .status-line {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            margin-top: .85rem;
+            font-size: .8rem;
+            color: var(--muted);
+            flex-wrap: wrap;
+        }
+
+        .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #cbd5e1; display: inline-block;
+        }
+        .dot.ok { background: var(--success); }
+        .dot.err { background: var(--error); }
+
+        /* --- Thống kê --- */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: .75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .stat {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: .6rem;
+            padding: .9rem 1rem;
+        }
+
+        .stat .k { font-size: .74rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+        .stat .v { font-size: 1.35rem; font-weight: 700; margin-top: .2rem; }
+
+        /* --- Toolbar --- */
+        .toolbar {
+            display: flex;
+            gap: .75rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .toolbar input[type="search"] { flex: 1; min-width: 180px; }
+
+        /* --- Bảng --- */
+        .table-wrap { overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+
+        th {
+            text-align: left;
+            font-size: .74rem;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: var(--muted);
+            padding: .6rem .5rem;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: .7rem .5rem;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #f8fafc; }
+
+        .name { font-weight: 600; }
+        .desc { color: var(--muted); font-size: .8rem; margin-top: .15rem; max-width: 320px; }
+        .price { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; }
+        .qty { font-variant-numeric: tabular-nums; }
+        .qty.low { color: var(--error); font-weight: 700; }
+        .muted { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+
+        .actions { display: flex; gap: .35rem; justify-content: flex-end; }
+
+        .empty {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: var(--muted);
+            font-size: .9rem;
+        }
+
+        /* --- Modal --- */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, .45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 50;
+        }
+        .overlay.open { display: flex; }
+
+        .modal {
+            background: #fff;
+            border-radius: .75rem;
+            width: 100%;
+            max-width: 480px;
+            padding: 1.4rem;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, .25);
+        }
+
+        .modal h3 { font-size: 1.05rem; margin-bottom: 1rem; }
+        .modal .field { margin-bottom: .85rem; }
+        .modal-actions { display: flex; gap: .6rem; justify-content: flex-end; margin-top: 1.2rem; }
+
+        .err-text { color: var(--error); font-size: .78rem; margin-top: .3rem; min-height: 1rem; }
+
+        /* --- Toast --- */
+        #toasts {
+            position: fixed;
+            right: 1rem;
+            bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+            z-index: 100;
+        }
+
+        .toast {
+            background: #0f172a;
+            color: #fff;
+            padding: .65rem .9rem;
+            border-radius: .45rem;
+            font-size: .82rem;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, .25);
+            animation: slide .2s ease-out;
+            max-width: 320px;
+        }
+        .toast.ok { border-left: 4px solid var(--success); }
+        .toast.err { border-left: 4px solid var(--error); }
+
+        @keyframes slide { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>
+        Quản lý sản phẩm
+        <span class="pill">ProductService · :5103</span>
+    </h1>
+    <p class="subtitle">
+        Bài thực hành số 3 — dịch vụ CRUD sản phẩm chạy độc lập trên cổng riêng và database riêng (SQLite).
+        Mọi thao tác yêu cầu JWT do LoginService (:5101) cấp.
+    </p>
+</header>
+
+<!-- ================= ĐĂNG NHẬP ================= -->
+<section class="card">
+    <h2>Xác thực</h2>
+    <div class="auth-row">
+        <div class="field">
+            <label for="username">Tên đăng nhập</label>
+            <input id="username" type="text" value="admin" autocomplete="username">
+        </div>
+        <div class="field">
+            <label for="password">Mật khẩu</label>
+            <input id="password" type="password" value="Admin@123" autocomplete="current-password">
+        </div>
+        <button id="btnLogin" onclick="login()">Đăng nhập</button>
+    </div>
+
+    <div class="status-line">
+        <span id="tokenDot" class="dot"></span>
+        <span id="tokenState">Chưa có token — hãy đăng nhập</span>
+        <button class="ghost sm" onclick="logout()">Đăng xuất</button>
+        <a href="/swagger" target="_blank" style="margin-left:auto;font-size:.8rem;color:var(--primary);text-decoration:none;font-weight:600;">Mở Swagger UI →</a>
+    </div>
+</section>
+
+<!-- ================= THỐNG KÊ ================= -->
+<div class="stats">
+    <div class="stat"><div class="k">Tổng sản phẩm</div><div class="v" id="statCount">—</div></div>
+    <div class="stat"><div class="k">Tổng số lượng</div><div class="v" id="statQty">—</div></div>
+    <div class="stat"><div class="k">Tổng giá trị kho</div><div class="v" id="statValue">—</div></div>
+</div>
+
+<!-- ================= DANH SÁCH ================= -->
+<section class="card">
+    <div class="toolbar">
+        <input id="search" type="search" placeholder="Tìm theo tên hoặc mô tả..." oninput="render()">
+        <button class="ghost" onclick="loadProducts()">Tải lại</button>
+        <button onclick="openCreate()">+ Thêm sản phẩm</button>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:56px">ID</th>
+                    <th>Sản phẩm</th>
+                    <th style="text-align:right">Giá</th>
+                    <th style="text-align:right">SL</th>
+                    <th>Cập nhật</th>
+                    <th style="text-align:right">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+                <tr><td colspan="6" class="empty">Chưa tải dữ liệu.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ================= MODAL THÊM / SỬA ================= -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+        <h3 id="modalTitle">Thêm sản phẩm</h3>
+
+        <div class="field">
+            <label for="fName">Tên sản phẩm *</label>
+            <input id="fName" type="text" maxlength="255" placeholder="VD: Tai nghe Sony WH-1000XM5">
+        </div>
+        <div class="field">
+            <label for="fDesc">Mô tả</label>
+            <textarea id="fDesc" maxlength="2000" placeholder="Mô tả ngắn..."></textarea>
+        </div>
+        <div class="field">
+            <label for="fPrice">Giá (VND) *</label>
+            <input id="fPrice" type="number" min="0" step="1000" value="0">
+        </div>
+        <div class="field">
+            <label for="fQty">Số lượng *</label>
+            <input id="fQty" type="number" min="0" step="1" value="0">
+        </div>
+
+        <div class="err-text" id="formErr"></div>
+
+        <div class="modal-actions">
+            <button class="ghost" onclick="closeModal()">Hủy</button>
+            <button id="btnSave" onclick="save()">Lưu</button>
+        </div>
+    </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+    // ProductService phục vụ chính trang này nên gọi cùng origin
+    const API_BASE = '';
+    const LOGIN_BASE = 'http://localhost:5101';
+
+    let token = localStorage.getItem('soa_lab3_token') || '';
+    let items = [];
+    let editingId = null;
+
+    const vnd = new Intl.NumberFormat('vi-VN');
+
+    // ---------- Tiện ích ----------
+    function toast(msg, kind = 'ok') {
+        const el = document.createElement('div');
+        el.className = 'toast ' + kind;
+        el.textContent = msg;
+        document.getElementById('toasts').appendChild(el);
+        setTimeout(() => el.remove(), 3500);
+    }
+
+    function setTokenState() {
+        const dot = document.getElementById('tokenDot');
+        const text = document.getElementById('tokenState');
+        if (token) {
+            dot.className = 'dot ok';
+            let who = 'đã đăng nhập';
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+                const name = payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || payload.unique_name || payload.sub;
+                const role = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || payload.role;
+                if (name) who = name + (role ? ' · ' + role : '');
+            } catch (e) { /* token lạ, bỏ qua */ }
+            text.textContent = 'Token hợp lệ — ' + who;
+        } else {
+            dot.className = 'dot err';
+            text.textContent = 'Chưa có token — hãy đăng nhập';
+        }
+    }
+
+    async function login() {
+        const userName = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        const btn = document.getElementById('btnLogin');
+        btn.disabled = true;
+
+        try {
+            const res = await fetch(`${LOGIN_BASE}/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userName, password })
+            });
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                toast(data.message || 'Đăng nhập thất bại (' + res.status + ')', 'err');
+                return;
+            }
+
+            token = data.accessToken;
+            localStorage.setItem('soa_lab3_token', token);
+            setTokenState();
+            toast('Đăng nhập thành công');
+            await loadProducts();
+        } catch (err) {
+            toast('Không kết nối được LoginService (:5101). Đã chạy service chưa?', 'err');
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    function logout() {
+        token = '';
+        localStorage.removeItem('soa_lab3_token');
+        items = [];
+        setTokenState();
+        render();
+        toast('Đã đăng xuất');
+    }
+
+    // ---------- Gọi API ----------
+    async function api(path, options = {}) {
+        const res = await fetch(API_BASE + path, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
+                ...(options.headers || {})
+            }
+        });
+
+        if (res.status === 401) {
+            token = '';
+            localStorage.removeItem('soa_lab3_token');
+            setTokenState();
+            throw new Error('Token không hợp lệ hoặc đã hết hạn. Hãy đăng nhập lại.');
+        }
+
+        let body = null;
+        if (res.status !== 204) {
+            body = await res.json().catch(() => null);
+        }
+
+        if (!res.ok) {
+            const msg = body?.message
+                || (body?.errors ? Object.values(body.errors).flat().join(' ') : null)
+                || ('Lỗi HTTP ' + res.status);
+            throw new Error(msg);
+        }
+
+        return body;
+    }
+
+    async function loadProducts() {
+        if (!token) {
+            render();
+            return;
+        }
+
+        try {
+            items = await api('/products');
+            render();
+        } catch (err) {
+            toast(err.message, 'err');
+            items = [];
+            render();
+        }
+    }
+
+    // ---------- Hiển thị ----------
+    function render() {
+        const tbody = document.getElementById('tbody');
+        const keyword = document.getElementById('search').value.trim().toLowerCase();
+
+        if (!token) {
+            tbody.innerHTML = '<tr><td colspan="6" class="empty">Hãy đăng nhập để xem danh sách sản phẩm.</td></tr>';
+            setStats([]);
+            return;
+        }
+
+        const filtered = items.filter(p =>
+            !keyword
+            || (p.name || '').toLowerCase().includes(keyword)
+            || (p.description || '').toLowerCase().includes(keyword)
+        );
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="empty">'
+                + (items.length === 0 ? 'Chưa có sản phẩm nào. Bấm “+ Thêm sản phẩm”.' : 'Không tìm thấy sản phẩm phù hợp.')
+                + '</td></tr>';
+            setStats(items);
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(p => `
+            <tr>
+                <td class="muted">#${p.id}</td>
+                <td>
+                    <div class="name">${escapeHtml(p.name)}</div>
+                    ${p.description ? `<div class="desc">${escapeHtml(p.description)}</div>` : ''}
+                </td>
+                <td class="price" style="text-align:right">${vnd.format(p.price)} ₫</td>
+                <td class="qty ${p.quantity === 0 ? 'low' : ''}" style="text-align:right">${p.quantity}</td>
+                <td class="muted">${formatDate(p.updatedAt)}</td>
+                <td>
+                    <div class="actions">
+                        <button class="ghost sm" onclick="openEdit(${p.id})">Sửa</button>
+                        <button class="danger sm" onclick="remove(${p.id})">Xóa</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+        setStats(items);
+    }
+
+    function setStats(list) {
+        document.getElementById('statCount').textContent = token ? list.length : '—';
+        document.getElementById('statQty').textContent = token
+            ? vnd.format(list.reduce((s, p) => s + p.quantity, 0)) : '—';
+        const value = list.reduce((s, p) => s + p.price * p.quantity, 0);
+        document.getElementById('statValue').textContent = token
+            ? (value >= 1e9 ? (value / 1e9).toFixed(2) + ' tỷ ₫' : vnd.format(value) + ' ₫')
+            : '—';
+    }
+
+    function escapeHtml(s) {
+        return String(s ?? '').replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    function formatDate(iso) {
+        const d = new Date(iso);
+        if (isNaN(d)) return '—';
+        return d.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ---------- Modal ----------
+    function openCreate() {
+        if (!token) { toast('Hãy đăng nhập trước', 'err'); return; }
+        editingId = null;
+        document.getElementById('modalTitle').textContent = 'Thêm sản phẩm';
+        document.getElementById('fName').value = '';
+        document.getElementById('fDesc').value = '';
+        document.getElementById('fPrice').value = 0;
+        document.getElementById('fQty').value = 0;
+        document.getElementById('formErr').textContent = '';
+        document.getElementById('overlay').classList.add('open');
+        document.getElementById('fName').focus();
+    }
+
+    function openEdit(id) {
+        const p = items.find(x => x.id === id);
+        if (!p) return;
+        editingId = id;
+        document.getElementById('modalTitle').textContent = 'Sửa sản phẩm #' + id;
+        document.getElementById('fName').value = p.name;
+        document.getElementById('fDesc').value = p.description || '';
+        document.getElementById('fPrice').value = p.price;
+        document.getElementById('fQty').value = p.quantity;
+        document.getElementById('formErr').textContent = '';
+        document.getElementById('overlay').classList.add('open');
+        document.getElementById('fName').focus();
+    }
+
+    function closeModal() {
+        document.getElementById('overlay').classList.remove('open');
+        editingId = null;
+    }
+
+    async function save() {
+        const name = document.getElementById('fName').value.trim();
+        const description = document.getElementById('fDesc').value.trim();
+        const price = Number(document.getElementById('fPrice').value);
+        const quantity = Number(document.getElementById('fQty').value);
+        const errBox = document.getElementById('formErr');
+
+        if (!name) { errBox.textContent = 'Tên sản phẩm không được để trống.'; return; }
+        if (price < 0) { errBox.textContent = 'Giá không được âm.'; return; }
+        if (!Number.isInteger(quantity) || quantity < 0) { errBox.textContent = 'Số lượng phải là số nguyên không âm.'; return; }
+
+        const payload = { name, description: description || null, price, quantity };
+        const btn = document.getElementById('btnSave');
+        btn.disabled = true;
+        errBox.textContent = '';
+
+        try {
+            if (editingId === null) {
+                await api('/products', { method: 'POST', body: JSON.stringify(payload) });
+                toast('Đã thêm sản phẩm');
+            } else {
+                await api('/products/' + editingId, { method: 'PUT', body: JSON.stringify(payload) });
+                toast('Đã cập nhật sản phẩm');
+            }
+            closeModal();
+            await loadProducts();
+        } catch (err) {
+            errBox.textContent = err.message;
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    async function remove(id) {
+        const p = items.find(x => x.id === id);
+        if (!confirm(`Xóa sản phẩm "${p ? p.name : '#' + id}"?`)) return;
+
+        try {
+            await api('/products/' + id, { method: 'DELETE' });
+            toast('Đã xóa sản phẩm');
+            await loadProducts();
+        } catch (err) {
+            toast(err.message, 'err');
+        }
+    }
+
+    // ---------- Khởi động ----------
+    (function init() {
+        setTokenState();
+        if (token) loadProducts(); else render();
+
+        document.getElementById('password').addEventListener('keydown', e => {
+            if (e.key === 'Enter') login();
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
+        });
+    })();
+</script>
+</body>
+</html>

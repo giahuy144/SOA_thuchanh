@@ -131,12 +131,14 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseCors("Lab");
+
+// Phục vụ giao diện quản lý sản phẩm (wwwroot/index.html) ngay tại http://localhost:5103/
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
-// Mở http://localhost:5103/ sẽ chuyển thẳng sang Swagger UI
-app.MapGet("/", () => Results.Redirect("/swagger"));
 
 // Endpoint kiểm tra service đang chạy (không cần token)
 app.MapGet("/health", () => Results.Ok(new
@@ -144,6 +146,7 @@ app.MapGet("/health", () => Results.Ok(new
     service = "ProductService",
     status = "ok",
     database = "SQLite (products.db)",
+    ui = "/",
     swagger = "/swagger",
     timeUtc = DateTime.UtcNow
 }));

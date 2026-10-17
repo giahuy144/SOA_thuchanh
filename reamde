@@ -13,6 +13,7 @@ BÀI THỰC HÀNH SỐ 3 - PRODUCT SERVICE
 ------------------------------------------------------------
 - Chạy độc lập, database riêng: SQLite (src/ProductService/products.db),
   tự tạo bảng + seed 3 sản phẩm mẫu ở lần chạy đầu tiên.
+- Giao diện quản lý sản phẩm: http://localhost:5103  (đăng nhập rồi CRUD trực tiếp)
 - Swagger UI: http://localhost:5103/swagger
 - Health check: http://localhost:5103/health
 
