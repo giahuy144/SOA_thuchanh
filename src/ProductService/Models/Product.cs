@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProductService.Models;
 
+/// <summary>
+/// Thực thể sản phẩm - ánh xạ 1-1 với bảng "products" trong database riêng của ProductService.
+/// </summary>
 [Table("products")]
 public class Product
 {
@@ -26,19 +29,4 @@ public class Product
 
     [Column("updated_at")]
     public DateTime UpdatedAt { get; set; }
-}
-
-// Dữ liệu client gửi lên (không cho client tự đặt id / created_at / updated_at)
-public class ProductRequest
-{
-    [Required, MaxLength(255)]
-    public string Name { get; set; } = string.Empty;
-
-    public string? Description { get; set; }
-
-    [Range(0, 99999999.99)]
-    public decimal Price { get; set; }
-
-    [Range(0, int.MaxValue)]
-    public int Quantity { get; set; }
 }

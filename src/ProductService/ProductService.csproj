@@ -1,18 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ProductService</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.*" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.9" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
   </ItemGroup>
 
-  <!-- Nếu muốn dùng chung JwtSettings của SOA.Shared, bỏ comment dòng dưới -->
-  <!-- <ItemGroup><ProjectReference Include="..\SOA.Shared\SOA.Shared.csproj" /></ItemGroup> -->
+  <ItemGroup>
+    <!-- Dùng chung JwtSettings + JwtTokenHelper với LoginService / AuthenticationService -->
+    <ProjectReference Include="..\SOA.Shared\SOA.Shared.csproj" />
+  </ItemGroup>
 
 </Project>

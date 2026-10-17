@@ -1,8 +1,33 @@
 cách chạy:
-b1
-dotnet run --project "D:\SOA\SOA.worktrees\make-it-happen\src\LoginService\LoginService.csproj"
+b1 - LoginService (cổng 5101) - phát hành JWT
+dotnet run --project src/LoginService/LoginService.csproj
 
+b2 - AuthenticationService (cổng 5102) - xác thực JWT
+dotnet run --project src/AuthenticationService/AuthenticationService.csproj
 
-b2
-dotnet run --project "D:\SOA\SOA.worktrees\make-it-happen\src\AuthenticationService\AuthenticationService.csproj"
+b3 - ProductService (cổng 5103) - quản lý sản phẩm (bài thực hành số 3)
+dotnet run --project src/ProductService/ProductService.csproj
 
+------------------------------------------------------------
+BÀI THỰC HÀNH SỐ 3 - PRODUCT SERVICE
+------------------------------------------------------------
+- Chạy độc lập, database riêng: SQLite (src/ProductService/products.db),
+  tự tạo bảng + seed 3 sản phẩm mẫu ở lần chạy đầu tiên.
+- Swagger UI: http://localhost:5103/swagger
+- Health check: http://localhost:5103/health
+
+API:
+  GET    /products        lấy danh sách sản phẩm
+  GET    /products/{id}   lấy chi tiết sản phẩm
+  POST   /products        thêm sản phẩm mới
+  PUT    /products/{id}   cập nhật sản phẩm
+  DELETE /products/{id}   xóa sản phẩm
+
+Tất cả API đều yêu cầu header: Authorization: Bearer {token}
+Token lấy từ LoginService (bài thực hành số 2):
+  POST http://localhost:5101/api/login
+  { "userName": "admin", "password": "Admin@123" }
+  hoặc { "userName": "user", "password": "User@123" }
+
+Lưu ý: Jwt Key/Issuer/Audience trong ProductService/appsettings.json phải
+TRÙNG với LoginService thì token mới xác thực được.

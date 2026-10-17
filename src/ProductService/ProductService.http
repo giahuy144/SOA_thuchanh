@@ -1,0 +1,62 @@
+@ProductService_HostAddress = http://localhost:5103
+@LoginService_HostAddress = http://localhost:5101
+
+### 0) Lấy JWT từ LoginService (bài thực hành số 2)
+# Tài khoản demo: admin / Admin@123  hoặc  user / User@123
+# @name login
+POST {{LoginService_HostAddress}}/api/login
+Content-Type: application/json
+
+{
+  "userName": "admin",
+  "password": "Admin@123"
+}
+
+###
+@token = {{login.response.body.$.accessToken}}
+
+### 1) Health check (không cần token)
+GET {{ProductService_HostAddress}}/health
+
+### 2) GET /products - danh sách tất cả sản phẩm
+GET {{ProductService_HostAddress}}/products
+Authorization: Bearer {{token}}
+
+### 3) GET /products/{id} - chi tiết một sản phẩm
+GET {{ProductService_HostAddress}}/products/1
+Authorization: Bearer {{token}}
+
+### 4) POST /products - thêm sản phẩm mới
+POST {{ProductService_HostAddress}}/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Tai nghe Sony WH-1000XM5",
+  "description": "Tai nghe chống ồn chủ động, pin 30 giờ",
+  "price": 6490000,
+  "quantity": 15
+}
+
+### 5) PUT /products/{id} - cập nhật sản phẩm
+PUT {{ProductService_HostAddress}}/products/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Laptop Dell XPS 13 (2026)",
+  "description": "Laptop 13 inch, Intel Core Ultra 7, RAM 32GB, SSD 1TB",
+  "price": 32990000,
+  "quantity": 8
+}
+
+### 6) DELETE /products/{id} - xóa sản phẩm
+DELETE {{ProductService_HostAddress}}/products/3
+Authorization: Bearer {{token}}
+
+### 7) Trường hợp không có token -> mong đợi 401
+GET {{ProductService_HostAddress}}/products
+
+### 8) Trường hợp id không tồn tại -> mong đợi 404
+GET {{ProductService_HostAddress}}/products/9999
+Authorization: Bearer {{token}}
