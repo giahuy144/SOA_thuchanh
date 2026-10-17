@@ -482,3 +482,7 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# SQLite WAL/SHM (file tam, sinh ra khi chay service)
+*.db-shm
+*.db-wal
