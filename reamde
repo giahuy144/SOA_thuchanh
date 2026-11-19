@@ -11,6 +11,9 @@ dotnet run --project src/ProductService/ProductService.csproj
 b4 - OrderService (cổng 5104) - quản lý đơn hàng (bài thực hành số 4)
 dotnet run --project src/OrderService/OrderService.csproj
 
+b5 - ReportService (cổng 5105) - báo cáo (bài thực hành số 5)
+dotnet run --project src/ReportService/ReportService.csproj
+
 ------------------------------------------------------------
 BÀI THỰC HÀNH SỐ 3 - PRODUCT SERVICE
 ------------------------------------------------------------
@@ -68,3 +71,37 @@ Ví dụ tạo đơn:
 Trạng thái hợp lệ: Pending, Confirmed, Shipped, Delivered, Cancelled.
 Giá và tên sản phẩm được lưu thành snapshot trong chi tiết đơn; OrderService
 không truy cập trực tiếp cơ sở dữ liệu của ProductService.
+
+------------------------------------------------------------
+BÀI THỰC HÀNH SỐ 5 - REPORT SERVICE
+------------------------------------------------------------
+- Chạy độc lập ở cổng 5105, database SQLite riêng
+  (src/ReportService/reports.db), lưu giá vốn và lịch sử snapshot báo cáo.
+- Swagger UI: http://localhost:5105/swagger
+- Health check: http://localhost:5105/health
+- ProductService (5103) và OrderService (5104) cần chạy để tạo báo cáo.
+  ReportService lấy dữ liệu qua REST API, không truy cập database của service khác.
+- JWT Key/Issuer/Audience dùng chung LoginService. Dùng cùng Bearer token
+  để ReportService có thể chuyển tiếp token khi gọi các service dữ liệu.
+
+API (đều yêu cầu Authorization: Bearer {token}):
+  GET  /reports/products?from=2026-01-01&to=2027-01-01
+       tồn kho hiện tại, số lượng bán, doanh thu, giá vốn và lợi nhuận theo sản phẩm
+  GET  /reports/orders?from=2026-01-01&to=2027-01-01
+       doanh thu, chi phí và lợi nhuận theo đơn hàng
+  PUT  /reports/product-costs/{productId}  nhập/cập nhật giá vốn đơn vị
+  GET  /reports/product-costs              xem giá vốn đã nhập
+  POST /reports/products/snapshot          tạo và lưu snapshot báo cáo sản phẩm
+  POST /reports/orders/snapshot            tạo và lưu snapshot báo cáo đơn hàng
+  GET  /reports/snapshots                  xem lịch sử snapshot đã lưu
+
+Ví dụ nhập giá vốn:
+  PUT http://localhost:5105/reports/product-costs/1
+  { "unitCost": 120.00 }
+
+Quy ước: đơn hàng Shipped hoặc Delivered được tính là đã bán; các trạng thái
+khác không cộng vào doanh thu. Doanh thu sử dụng giá/line total đã snapshot
+trong đơn hàng. Giá vốn được nhập riêng cho từng sản phẩm vào ReportService;
+đơn hàng có sản phẩm chưa khai báo giá vốn sẽ có lợi nhuận null, tránh báo cáo
+sai như thể chi phí bằng 0. Thời gian lọc áp dụng lên ngày tạo đơn (From gồm,
+To không gồm); tồn kho là số lượng hiện tại từ ProductService.
