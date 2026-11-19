@@ -8,6 +8,9 @@ dotnet run --project src/AuthenticationService/AuthenticationService.csproj
 b3 - ProductService (cổng 5103) - quản lý sản phẩm (bài thực hành số 3)
 dotnet run --project src/ProductService/ProductService.csproj
 
+b4 - OrderService (cổng 5104) - quản lý đơn hàng (bài thực hành số 4)
+dotnet run --project src/OrderService/OrderService.csproj
+
 ------------------------------------------------------------
 BÀI THỰC HÀNH SỐ 3 - PRODUCT SERVICE
 ------------------------------------------------------------
@@ -32,3 +35,36 @@ Token lấy từ LoginService (bài thực hành số 2):
 
 Lưu ý: Jwt Key/Issuer/Audience trong ProductService/appsettings.json phải
 TRÙNG với LoginService thì token mới xác thực được.
+
+------------------------------------------------------------
+BÀI THỰC HÀNH SỐ 4 - ORDER SERVICE
+------------------------------------------------------------
+- Chạy độc lập ở cổng 5104, dùng database SQLite riêng
+  (src/OrderService/orders.db), tự tạo bảng orders + order_items khi khởi chạy.
+- Swagger UI: http://localhost:5104/swagger
+- Health check: http://localhost:5104/health
+- ProductService cần chạy ở cổng 5103 để OrderService kiểm tra sản phẩm và tồn kho.
+  Có thể đổi URL tại Services:ProductServiceUrl trong appsettings.json.
+- OrderService gửi JWT của yêu cầu hiện tại sang ProductService khi kiểm tra sản phẩm.
+  Tài khoản/token dùng chung LoginService như bài thực hành số 3.
+
+API (đều yêu cầu Authorization: Bearer {token}):
+  GET    /orders             lấy danh sách đơn hàng
+  GET    /orders/{id}        lấy chi tiết đơn hàng
+  POST   /orders             tạo đơn, kiểm tra sản phẩm và tồn kho qua ProductService
+  PATCH  /orders/{id}/status cập nhật trạng thái
+  DELETE /orders/{id}        xóa đơn hàng
+
+Ví dụ tạo đơn:
+  POST http://localhost:5104/orders
+  {
+    "customerName": "Nguyen Van A",
+    "items": [
+      { "productId": 1, "quantity": 2 },
+      { "productId": 2, "quantity": 1 }
+    ]
+  }
+
+Trạng thái hợp lệ: Pending, Confirmed, Shipped, Delivered, Cancelled.
+Giá và tên sản phẩm được lưu thành snapshot trong chi tiết đơn; OrderService
+không truy cập trực tiếp cơ sở dữ liệu của ProductService.
